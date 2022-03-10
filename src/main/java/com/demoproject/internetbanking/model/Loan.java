@@ -21,11 +21,12 @@ public class Loan extends BaseEntity{
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    public Loan(Long loanAmount, Integer loanPeriod, Integer percent) {
+    public Loan(Long loanAmount, Integer loanPeriod, Integer percent, Client client) {
         super(null);
         this.loanAmount = loanAmount;
         this.loanPeriod = loanPeriod;
         this.percent = percent;
+        this.client = client;
         this.registered = new Date();
     }
 

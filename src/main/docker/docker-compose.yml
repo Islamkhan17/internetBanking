@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  app:
+    image: 'banking'
+    build: .
+    ports:
+      - 80:8080
+    depends_on:
+      - db
+    container_name: app
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/bankclient
+      - SPRING_DATASOURCE_USERNAME=user1
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    container_name: bankclient_db
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user1
+      - POSTGRES_DB=bankclient
+    ports:
+      - 5431:5431

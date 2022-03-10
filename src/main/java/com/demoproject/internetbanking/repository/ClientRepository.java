@@ -1,6 +1,7 @@
 package com.demoproject.internetbanking.repository;
 
 import com.demoproject.internetbanking.model.Client;
+import com.demoproject.internetbanking.util.Token;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,10 +24,14 @@ public class ClientRepository {
         return false;
     }
 
-
     public Client get(int id) {
         return clientCrudRepository.findById(id).orElse(null);
     }
+
+    public Client get(String token){
+        return clientCrudRepository.getByToken(token).stream().findAny().orElse(null);
+    }
+
 
     public List<Client> getAll() {
         return clientCrudRepository.findAll();

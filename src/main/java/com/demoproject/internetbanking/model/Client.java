@@ -1,11 +1,12 @@
 package com.demoproject.internetbanking.model;
 
+import com.demoproject.internetbanking.util.Token;
 import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "clients")
+@Table(name = "clients", uniqueConstraints = {@UniqueConstraint(columnNames = {"token"}, name = "unique_client_token_idx")})
 public class Client extends BaseEntity{
 
     public Client() {
@@ -18,17 +19,17 @@ public class Client extends BaseEntity{
     @NotNull
     private String patronymic;
     @NotNull
-    private Integer iin;
+    private Long iin;
     @NotNull
-    private Integer phone;
+    private Long phone;
     @NotNull
     private String password;
     @NotNull
     private String address;
+    @NotNull
+    private String token;
 
-
-
-    public Client(String name, String lastName, String patronymic, Integer iin, Integer phone, String password, String address) {
+    public Client(String name, String lastName, String patronymic, Long iin, Long phone, String password, String address, String token) {
         super(null);
         this.name = name;
         this.lastName = lastName;
@@ -37,6 +38,7 @@ public class Client extends BaseEntity{
         this.phone = phone;
         this.password = password;
         this.address = address;
+        this.token = token;
     }
 
     public Integer getId() {
@@ -71,19 +73,19 @@ public class Client extends BaseEntity{
         this.patronymic = patronymic;
     }
 
-    public Integer getIin() {
+    public Long getIin() {
         return iin;
     }
 
-    public void setIin(Integer iin) {
+    public void setIin(Long iin) {
         this.iin = iin;
     }
 
-    public Integer getPhone() {
+    public Long getPhone() {
         return phone;
     }
 
-    public void setPhone(Integer phone) {
+    public void setPhone(Long phone) {
         this.phone = phone;
     }
 
@@ -101,5 +103,13 @@ public class Client extends BaseEntity{
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

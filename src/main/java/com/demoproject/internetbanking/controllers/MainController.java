@@ -1,109 +1,127 @@
 package com.demoproject.internetbanking.controllers;
 
-import antlr.Token;
 import com.demoproject.internetbanking.model.Client;
+import com.demoproject.internetbanking.util.Date;
 import com.demoproject.internetbanking.model.Loan;
 import com.demoproject.internetbanking.repository.ClientRepository;
 import com.demoproject.internetbanking.repository.LoanRepository;
+import com.demoproject.internetbanking.util.Token;
 import com.demoproject.internetbanking.util.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import static com.demoproject.internetbanking.util.ValidationUtil.checkNotFound;
 import static com.demoproject.internetbanking.util.ValidationUtil.checkNotFoundWithId;
 
 @Controller
 public class MainController {
 
-    private static final Client CLIENT = new Client("Маша", "Иванова", "Петрова", 1231231, 7777777, "пороль", "Москва");
+    private static final Client CLIENT1 = new Client("Маша", "Иванова", "Петрова", 12345l, 7777777l, "пороль", "Москва", Token.generateToken("пороль",7777771l ));
+    private static final Client CLIENT2 = new Client("Маша", "Иванова", "Петрова", 12345l, 7777777l, "пороль1", "Москва", Token.generateToken("пороль1",7777772l ));
+    private static final Client CLIENT3 = new Client("Маша", "Иванова", "Петрова", 12345l, 7777777l, "пороль2", "Москва", Token.generateToken("пороль2",7777773l ));
+    private static final Client CLIENT4 = new Client("Маша", "Иванова", "Петрова", 12345l, 7777777l, "пороль3", "Москва", Token.generateToken("пороль3",7777774l ));
 
     private ClientRepository clientRepository;
     private LoanRepository loanRepository;
+
+    private void init(){
+        clientRepository.save(CLIENT1);
+        clientRepository.save(CLIENT2);
+        clientRepository.save(CLIENT3);
+        clientRepository.save(CLIENT4);
+    }
 
 
     public MainController(ClientRepository clientRepository, LoanRepository loanRepository) {
         this.clientRepository = clientRepository;
         this.loanRepository = loanRepository;
+//        init();
     }
 
     @GetMapping("/")
     public String homePage(Model model) {
-        model.addAttribute("title", "Главная страница");
+        model.addAttribute("title", "InternetBanking");
         return "home";
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Token> registered(@RequestParam(value = "name", required = false) String name,
-                                            @RequestParam(value = "lastName", required = false) String lastName,
+    public ResponseEntity<Token> registered(@RequestParam(value = "name", required = true) String name,
+                                            @RequestParam(value = "lastName", required = true) String lastName,
                                             @RequestParam(value = "patronymic", required = false) String patronymic,
-                                            @RequestParam(value = "iin", required = false) Integer iin,
-                                            @RequestParam(value = "phone", required = false) Integer phone,
-                                            @RequestParam(value = "password", required = false) String password,
-                                            @RequestParam(value = "address", required = false) String address,
-                                            Model model) {
+                                            @RequestParam(value = "iin", required = true) Long iin,
+                                            @RequestParam(value = "phone", required = true) Long phone,
+                                            @RequestParam(value = "password", required = true) String password,
+                                            @RequestParam(value = "address", required = false) String address) {
         System.out.println("REGISTERED");
-        Client client = new Client(name, lastName, patronymic, iin, phone, password, address);
-        Token token = new Token(client.getPhone(), client.getPassword());
-        System.out.println(token);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+
+        String token = Token.generateToken(password, phone);
+        Client client = new Client(name, lastName, patronymic, iin, phone, password, address, token);
+        clientRepository.save(client);
+
+        return new ResponseEntity<>(new Token(token), HttpStatus.OK);
     }
 
+    // Генерирует токен по телефону и поролю. По токену ищет токен клиента в базе.
+    // Если токен найден и токены равны между собой отправляет токен клиенту.
     @GetMapping("/register")
-    public ResponseEntity<Token> getToken(@RequestParam("phone") Integer phone, @RequestParam("password") String password) {
-        System.out.println("GetToken");
-        //изменить если надо сделать запрос в базу на основании телефона и пороля
-        System.out.println(phone);
-        System.out.println(password);
-        Token token = new Token(phone, password);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+    public ResponseEntity<Token> getToken(@RequestParam("phone") Long phone, @RequestParam("password") String password) {
+        System.out.println("GetToken".toUpperCase(Locale.ROOT));
+        String bdToken;
+        String token = Token.generateToken(password, phone);
+        try {
+            bdToken = checkNotFound(clientRepository.get(token), "not found").getToken();
+            if (bdToken.compareTo(token) != 0) {
+                throw new NotFoundException("not compare");
+            }
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(new Token(token), HttpStatus.OK);
     }
 
 
-    // надо сгенерировать токен и вернуть его
     // генерировать надо внутри класса Client и записывать в бузу не известно
     @PostMapping("/application")
     public ResponseEntity<String> application(@RequestParam(value = "token", required = true) String token,
                                               @RequestParam(value = "loanAmount", required = false) Long loanAmount,
                                               @RequestParam(value = "loanPeriod", required = false) Integer loanPeriod,
-                                              @RequestParam(value = "percent", required = false) Integer percent,
-                                              Model model) {
+                                              @RequestParam(value = "percent", required = false) Integer percent) {
         System.out.println("application".toUpperCase(Locale.ROOT));
-        System.out.println(token);
-
         Client client;
         try {
-            client = checkNotFoundWithId(clientRepository.get(10), 10);
+            client = checkNotFound(clientRepository.get(token),"Check token");
+            if (client.getToken().compareTo(token)!= 0){
+                throw new NotFoundException("Token Not Compare");
+            }
         } catch (NotFoundException e) {
-            return new ResponseEntity<String>("failed", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
-        Loan loan = new Loan(loanAmount, loanPeriod, percent);
-        loan.setClient(client);
+        Loan loan = new Loan(loanAmount, loanPeriod, percent,client);
         loanRepository.save(loan);
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
 
 
     @GetMapping("/client/{id}/nextPaymentDate")
-    public ResponseEntity<LocalDate> nextPaymentDate(@PathVariable("id") Integer id) {
+    public ResponseEntity<Date> nextPaymentDate(@PathVariable("id") Integer id) {
         System.out.println("nextPaymentDate".toUpperCase(Locale.ROOT));
         Loan loan;
         try {
             loan = checkNotFoundWithId(loanRepository.get(id), id);
         } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
-        LocalDate localDate = LocalDate.of(2022, 3, 5);
+        LocalDate localDate = LocalDate.now();
         LocalDate registerDate = LocalDate.ofInstant(
                 loan.getRegistered().toInstant(), ZoneId.systemDefault());
         System.out.println(localDate);
@@ -116,7 +134,8 @@ public class MainController {
             System.out.println("дата следующей оплаты " + nextPaymentDate);
         }
 
-        return new ResponseEntity<>(nextPaymentDate, HttpStatus.OK);
+
+        return new ResponseEntity<>(new Date(nextPaymentDate), HttpStatus.OK);
     }
 
 

@@ -6,6 +6,10 @@ public class ValidationUtil {
     private ValidationUtil() {
     }
 
+    public static <T> Boolean compare(T object1, T object2){
+        return object1.equals(object2);
+    }
+
     public static <T> T checkNotFoundWithId(T object, int id) {
         checkNotFoundWithId(object != null, id);
         return object;
@@ -22,7 +26,7 @@ public class ValidationUtil {
 
     public static void checkNotFound(boolean found, String msg) {
         if (!found) {
-            throw new NotFoundException("Not found entity with " + msg);
+            throw new NotFoundException("Not found. " + msg);
         }
     }
 
