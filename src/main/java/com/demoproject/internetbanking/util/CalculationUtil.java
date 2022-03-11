@@ -7,7 +7,7 @@ public class CalculationUtil {
     }
 
     public static int paidMonthCalculate(LocalDate registerDate, LocalDate dateNow) {
-        return (dateNow.getYear() - registerDate.getYear()) * 12 - registerDate.getMonthValue() + dateNow.getMonthValue() - 1;
+        return (dateNow.getYear() - registerDate.getYear()) * 12 - registerDate.getMonthValue() + dateNow.getMonthValue();
     }
 
     public static boolean isDayBeforePaidDay(LocalDate registerDate, LocalDate dateNow) {
@@ -19,9 +19,13 @@ public class CalculationUtil {
     }
 
     public static int yearOdds(LocalDate registerDate, LocalDate dateNow) {
-        System.out.println(dateNow.getYear());
-        System.out.println(registerDate.getYear());
         return dateNow.getYear() - registerDate.getYear();
+    }
+
+    public static void main(String[] args) {
+        LocalDate localDate1 = LocalDate.of(2022, 4, 10);
+        LocalDate localDate2 = LocalDate.now();
+        System.out.println(paidMonthCalculate(localDate2,localDate1));
     }
 
 }

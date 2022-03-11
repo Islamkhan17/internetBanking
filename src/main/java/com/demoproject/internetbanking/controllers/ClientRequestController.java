@@ -7,7 +7,7 @@ import com.demoproject.internetbanking.model.DTO.PaymentCount;
 import com.demoproject.internetbanking.model.Loan;
 import com.demoproject.internetbanking.repository.ClientRepository;
 import com.demoproject.internetbanking.repository.LoanRepository;
-import com.demoproject.internetbanking.util.Date;
+import com.demoproject.internetbanking.model.DTO.Date;
 import com.demoproject.internetbanking.util.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +26,11 @@ import static com.demoproject.internetbanking.util.ValidationUtil.checkNotFoundW
 @Controller
 public class ClientRequestController {
 
-    private ClientRepository clientRepository;
+
     private LoanRepository loanRepository;
 
-    public ClientRequestController(ClientRepository clientRepository, LoanRepository loanRepository) {
-        this.clientRepository = clientRepository;
+    public ClientRequestController(LoanRepository loanRepository) {
         this.loanRepository = loanRepository;
-//        init();
     }
 
     @GetMapping("/client/{id}/debt")
@@ -44,14 +42,13 @@ public class ClientRequestController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-
-        //        LocalDate localDate = LocalDate.now();
-        LocalDate localDate = LocalDate.of(2024, 3, 12);
+                LocalDate localDate = LocalDate.now();
+//        LocalDate localDate = LocalDate.of(2024, 3, 12);
         LocalDate registerDate = LocalDate.ofInstant(loan.getRegistered().toInstant(), ZoneId.systemDefault());
         if (localDate.compareTo(registerDate) < 0)
         {
             System.out.println("Current date is less than register date");
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         LocalDate localMonth = localDate;
         if (isDayBeforePaidDay(registerDate, localDate)) {
@@ -78,17 +75,15 @@ public class ClientRequestController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        //        LocalDate localDate = LocalDate.now();
-        LocalDate localDate = LocalDate.of(2022, 4, 10);
+                LocalDate localDate = LocalDate.now();
+//        LocalDate localDate = LocalDate.of(2023, 4, 10);
         LocalDate registerDate = LocalDate.ofInstant(
                 loan.getRegistered().toInstant(), ZoneId.systemDefault());
         if (localDate.compareTo(registerDate) < 0)
         {
             System.out.println("Current date is less than register date");
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        System.out.println(localDate);
-        System.out.println(registerDate);
 
         LocalDate localMonth = localDate;
         if (isDayBeforePaidDay(registerDate, localDate)) {
@@ -114,24 +109,20 @@ public class ClientRequestController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        //        LocalDate localDate = LocalDate.now();
-        LocalDate localDate = LocalDate.of(2024, 4, 10);
+                LocalDate localDate = LocalDate.now();
+//        LocalDate localDate = LocalDate.of(2024, 4, 10);
         LocalDate registerDate = LocalDate.ofInstant(
                 loan.getRegistered().toInstant(), ZoneId.systemDefault());
         if (localDate.compareTo(registerDate) < 0)
         {
             System.out.println("Current date is less than register date");
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        System.out.println(localDate);
-        System.out.println(registerDate);
-
         LocalDate localMonth = localDate;
         if (isDayBeforePaidDay(registerDate, localDate)) {
             localMonth = localDate.minus(1, ChronoUnit.MONTHS);
         }
         int paidMonths = paidMonthCalculate(registerDate, localMonth);
-        System.out.println("paidMonths = "+paidMonths);
         if (isPaidPeriodIsEnded(loan.getLoanPeriod(), paidMonths)) {
             System.out.println("Loan period is ended.");
             return new ResponseEntity<>(null, HttpStatus.OK);
@@ -149,14 +140,14 @@ public class ClientRequestController {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        //        LocalDate localDate = LocalDate.now();
-        LocalDate localDate = LocalDate.of(2024, 3, 12);
+        LocalDate localDate = LocalDate.now();
+//        LocalDate localDate = LocalDate.of(2024, 3, 12);
         LocalDate registerDate = LocalDate.ofInstant(loan.getRegistered().toInstant(), ZoneId.systemDefault());
 
         if (localDate.compareTo(registerDate) < 0)
         {
             System.out.println("Current date is less than register date");
-            return new ResponseEntity<>(null, HttpStatus.OK);
+            return new ResponseEntity<>(null, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         System.out.println(localDate);
         System.out.println(registerDate);
@@ -172,15 +163,8 @@ public class ClientRequestController {
             System.out.println("Loan period is ended. Nothing to debt");
             return new ResponseEntity<>(null, HttpStatus.OK);
         }
-        System.out.println("paidMonths = " + paidMonths);
-        // Можно расчитать кредит и положить в базу данных чтобы не расчитывать постоянно
-        Long fullCredit = loan.getLoanAmount() * (100 + loan.getPercent()) / 100;
-        System.out.println("credit = " + fullCredit);
-        System.out.println("credit = " + loan.getCredit());
         Long debt = loan.getCredit() - loan.getCredit() / loan.getLoanPeriod() * paidMonths;
         Long earlyPayment = debt * paidMonths / loan.getLoanPeriod() * (100 + loan.getPercent()) / 100;
-        System.out.println("debt = " + debt);
-        System.out.println("earlyPayment = " + earlyPayment);
         return new ResponseEntity<>(new EarlyPayment(earlyPayment), HttpStatus.OK);
     }
 
@@ -193,11 +177,15 @@ public class ClientRequestController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
-//        LocalDate localDate = LocalDate.now();
-        LocalDate localDate = LocalDate.of(2024, 3, 12);
+        LocalDate localDate = LocalDate.now();
+//        LocalDate localDate = LocalDate.of(2024, 3, 12);
         LocalDate registerDate = LocalDate.ofInstant(
                 loan.getRegistered().toInstant(), ZoneId.systemDefault());
-
+        if (localDate.compareTo(registerDate) < 0)
+        {
+            System.out.println("Current date is less than register date");
+            return new ResponseEntity<>(null, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         LocalDate nextPaymentDate = registerDate.plus(1, ChronoUnit.MONTHS);
         nextPaymentDate = nextPaymentDate.plus(yearOdds(registerDate, localDate), ChronoUnit.YEARS);
 

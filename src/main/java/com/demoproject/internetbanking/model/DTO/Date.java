@@ -1,4 +1,4 @@
-package com.demoproject.internetbanking.util;
+package com.demoproject.internetbanking.model.DTO;
 
 import java.time.LocalDate;
 

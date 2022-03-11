@@ -8,17 +8,19 @@ import java.util.Date;
 @Entity
 @Table(name = "loans")
 public class Loan extends BaseEntity{
-
+    @Column(nullable = false)
     private Long loanAmount;
     // исчисляется в месяцах
+    @Column(nullable = false)
     private Integer loanPeriod;
+    @Column(nullable = false)
     @Range(min = 1, max = 100)
     private Integer percent;
     @Column(name = "registered", nullable = false, columnDefinition = "timestamp default now()", updatable = false)
     private Date registered;
-
+    @Column(nullable = false)
     private Long credit;
-
+    @Column(nullable = false)
     private Long monthlyPayment;
 
     @ManyToOne(fetch = FetchType.LAZY)

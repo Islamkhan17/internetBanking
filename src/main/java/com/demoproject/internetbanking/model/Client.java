@@ -1,9 +1,9 @@
 package com.demoproject.internetbanking.model;
 
-import com.demoproject.internetbanking.util.Token;
 import com.sun.istack.NotNull;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "clients", uniqueConstraints = {@UniqueConstraint(columnNames = {"token"}, name = "unique_client_token_idx")})
@@ -12,20 +12,28 @@ public class Client extends BaseEntity{
     public Client() {
     }
 
-    @NotNull
+    @Column(nullable = false)
+    @NotBlank
     private String name;
-    @NotNull
+    @Column(nullable = false)
+    @NotBlank
     private String lastName;
+    @Column(nullable = false)
     @NotNull
     private String patronymic;
+    @Column(nullable = false)
     @NotNull
     private Long iin;
+    @Column(nullable = false)
     @NotNull
     private Long phone;
+    @Column(nullable = false)
     @NotNull
     private String password;
+    @Column(nullable = false)
     @NotNull
     private String address;
+    @Column(nullable = false)
     @NotNull
     private String token;
 

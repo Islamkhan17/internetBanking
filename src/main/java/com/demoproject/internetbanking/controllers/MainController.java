@@ -1,15 +1,10 @@
 package com.demoproject.internetbanking.controllers;
 
 import com.demoproject.internetbanking.model.Client;
-import com.demoproject.internetbanking.model.DTO.Debt;
-import com.demoproject.internetbanking.model.DTO.NextPayment;
-import com.demoproject.internetbanking.model.DTO.PaymentCount;
-import com.demoproject.internetbanking.util.CalculationUtil;
-import com.demoproject.internetbanking.util.Date;
 import com.demoproject.internetbanking.model.Loan;
 import com.demoproject.internetbanking.repository.ClientRepository;
 import com.demoproject.internetbanking.repository.LoanRepository;
-import com.demoproject.internetbanking.util.Token;
+import com.demoproject.internetbanking.model.DTO.Token;
 import com.demoproject.internetbanking.util.exception.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,16 +13,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Locale;
 
-import static com.demoproject.internetbanking.util.CalculationUtil.*;
-import static com.demoproject.internetbanking.util.CalculationUtil.isDayBeforePaidDay;
 import static com.demoproject.internetbanking.util.ValidationUtil.checkNotFound;
-import static com.demoproject.internetbanking.util.ValidationUtil.checkNotFoundWithId;
 
 @Controller
 public class MainController {
@@ -92,11 +80,11 @@ public class MainController {
         } catch (NotFoundException e) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
         }
+
         return new ResponseEntity<>(new Token(token), HttpStatus.OK);
     }
 
 
-    // генерировать надо внутри класса Client и записывать в бузу не известно
     @PostMapping("/application")
     public ResponseEntity<String> application(@RequestParam(value = "token", required = true) String token,
                                               @RequestParam(value = "loanAmount", required = false) Long loanAmount,
@@ -107,16 +95,16 @@ public class MainController {
         try {
             client = checkNotFound(clientRepository.get(token), "Check token");
             if (client.getToken().compareTo(token) != 0) {
-                throw new NotFoundException("Token Not Compare");
+                throw new RuntimeException("Token Not Compare");
             }
         } catch (NotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
         Long credit = loanAmount * (100 + percent) / 100;
         Long monthlyPayment = credit / loanPeriod;
-
         Loan loan = new Loan(loanAmount, loanPeriod, percent, client, credit, monthlyPayment);
         loanRepository.save(loan);
+
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
 

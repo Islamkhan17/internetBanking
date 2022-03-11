@@ -1,4 +1,4 @@
-package com.demoproject.internetbanking.util;
+package com.demoproject.internetbanking.model.DTO;
 
 public class Token {
     private String token;
@@ -34,12 +34,5 @@ public class Token {
             }
         }
         return String.valueOf(result);
-    }
-
-    public static void main(String[] args) {
-        String token = Token.generateToken("12312safasdasd", 1234567l);
-        String token1 = Token.generateToken("12312safasdasd", 1234567l);
-        System.out.println(token.compareTo(token1));
-        System.out.println("маша".compareTo("саша"));
     }
 }

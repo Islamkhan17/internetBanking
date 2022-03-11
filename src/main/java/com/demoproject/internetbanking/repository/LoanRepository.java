@@ -19,21 +19,11 @@ public class LoanRepository {
         return loanCrudRepository.save(loan);
     }
 
-    public boolean delete(int id, int client_id) {
-//        return crudRepository.delete(id) != 0;
-        return false;
-    }
-
     public Loan get(int clientId){
         return loanCrudRepository.get(clientId).stream().findAny().orElse(null);
     }
     public Loan get(int id, int clientId) {
         Loan loan = loanCrudRepository.findById(id).orElse(null);
         return loan != null && loan.getClient().getId() == clientId ? loan : null;
-    }
-
-    public List<Loan> getAll(int client_id) {
-//        return loanCrudRepository.findAll();
-        return Collections.emptyList();
     }
 }
