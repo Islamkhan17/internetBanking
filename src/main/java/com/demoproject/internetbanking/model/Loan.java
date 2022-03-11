@@ -15,18 +15,24 @@ public class Loan extends BaseEntity{
     @Range(min = 1, max = 100)
     private Integer percent;
     @Column(name = "registered", nullable = false, columnDefinition = "timestamp default now()", updatable = false)
-    private Date registered = new Date();
+    private Date registered;
+
+    private Long credit;
+
+    private Long monthlyPayment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    public Loan(Long loanAmount, Integer loanPeriod, Integer percent, Client client) {
+    public Loan(Long loanAmount, Integer loanPeriod, Integer percent, Client client, Long credit, Long monthlyPayment) {
         super(null);
         this.loanAmount = loanAmount;
         this.loanPeriod = loanPeriod;
         this.percent = percent;
         this.client = client;
+        this.credit = credit;
+        this.monthlyPayment = monthlyPayment;
         this.registered = new Date();
     }
 
@@ -71,5 +77,21 @@ public class Loan extends BaseEntity{
 
     public void setRegistered(Date registered) {
         this.registered = registered;
+    }
+
+    public Long getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Long credit) {
+        this.credit = credit;
+    }
+
+    public Long getMonthlyPayment() {
+        return monthlyPayment;
+    }
+
+    public void setMonthlyPayment(Long monthlyPayment) {
+        this.monthlyPayment = monthlyPayment;
     }
 }
